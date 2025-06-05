@@ -10,6 +10,8 @@ import ItemsPage from './components/ItemsPage';
 import ItemDetails from './components/ItemDetails';
 import Login from './components/Login'
 import Register from './components/Register'
+import MyInventoryPage from './components/MyInventoryPage'
+import MyItemPage from './components/MyItemPage'
 
 function App() {
   const [items, setItems] = useState([])
@@ -50,6 +52,8 @@ function App() {
         <Routes>
           <Route path = '/login' element = {<Login />}/>
           <Route path = '/register' element = {<Register />}/>
+          <Route path = '/my_inventory' element = {<MyInventoryPage />}/>
+          <Route path = '/my_item/:id' element = {<MyItemPage />}/>
           <Route path = '/inventory' element={<ItemsPage key={"Itemspage"} itemData = {items} clickHandler={handleItemClick}/>}/>
           <Route path = '/items/:id' element = {<ItemDetails key = {selectedItem.item_name + ' Details Page'} item = {selectedItem}/>}/>
         </Routes>

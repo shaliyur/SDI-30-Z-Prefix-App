@@ -1,10 +1,12 @@
 import React from 'react'
 import {useState, useEffect, createContext} from 'react';
+import {useNavigate} from 'react-router-dom'
 
 import { useAuth } from '../contexts/AuthContext'
 
 export default function Register() {
   const [newUser, setNewUser] = useState({});
+  const navigate = useNavigate()
 
   const addUserOnClick = (event) => {
     event.preventDefault();
@@ -25,12 +27,13 @@ export default function Register() {
     .then(response => response.json())
     .then(data => setNewUser(data))
     .then(() => {
-      alert('New user has been added! Navigate to "http://localhost:5173/login" to log in!')
+      alert('New user has been added!')
       document.getElementById('new_first').value = '';
       document.getElementById('new_last').value = '';
       document.getElementById('new_user').value = '';
       password: document.getElementById('new_password').value = ''
     })
+    .then(() => {navigate('/login')})
   }
 
   return(

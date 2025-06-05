@@ -1,9 +1,11 @@
 import React from 'react'
 
 import { useAuth } from '../contexts/AuthContext'
+import {BrowserRouter as Router, Routes, Route, Link, useNavigate} from 'react-router-dom'
 
 export default function Login() {
   const {authUser, setAuthUser, isLoggedIn, setIsLoggedIn} = useAuth();
+  const navigate = useNavigate();
 
   const logIn = (event) => {
     event.preventDefault();
@@ -37,7 +39,12 @@ export default function Login() {
     .then(new_user => {
       setAuthUser(new_user[0])
       setIsLoggedIn(true);
-      console.log(new_user[0])
+    })
+    .then(() => {
+      alert('Thank you for logging in! You will now be re-directed to your inventory page :)')
+      return(
+        navigate('/my_inventory')
+      )
     })
     .catch(response => console.log(response))
 
@@ -53,6 +60,23 @@ export default function Login() {
       username: 'visitor',
       password: ''
     })
+  }
+
+  const logInAsVisitor = (event) => {
+    event.preventDefault();
+    setAuthUser({
+      user_id: -1,
+      first_name: '',
+      last_name: '',
+      username: 'visitor',
+      password: ''
+    })
+
+    alert('Thank you for logging in as a visitor, you will now be redirected to the system"s full inventory page');
+
+    return(
+      navigate('/inventory')
+    )
   }
 
   return (
@@ -71,6 +95,12 @@ export default function Login() {
         <button onClick = {(event)=>{logIn(event)}}>Log In</button>
       </>
       }
+
+      <br />
+      <br />
+
+      <p> Don't Want to Login? </p>
+      <button onClick = {(event)=>{logInAsVisitor(event)}}> Login as Visitor </button>
 
     </div>
   )

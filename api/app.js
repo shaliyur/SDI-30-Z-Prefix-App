@@ -15,28 +15,45 @@ app.get('/', (request, response) => {
 });
 
 app.get('/items', (request, response) => {
-  knex('items')
-  .select('*')
-  .then(items => {
-    var itemData = items.map(item => {
-      return {
-        item_id: item.item_id,
-        user_id: item.user_id,
-        quantity: item.quantity,
-        item_name: item.item_name,
-        img_url: item.img_url
-      }
-    })
+  let { user_id } = request.query;
 
-    return itemData
-  })
-  .then(results => response.status(200).json(results))
-  .catch(err => {
-    console.log(err)
-    res.status(404).json({
-      message: 'Error with retrieving item data'
+  if (user_id !== undefined){
+    knex.select()
+    .from('items')
+    .where({user_id: user_id})
+    .then(data => response.status(200).json(data))
+    .catch(err => {
+      response.status(404).json({
+        message: 'user not found'
+      })
     })
-  })
+  }
+  else {
+    knex('items')
+    .select('*')
+    .then(items => {
+      var itemData = items.map(item => {
+        return {
+          item_id: item.item_id,
+          user_id: item.user_id,
+          quantity: item.quantity,
+          item_name: item.item_name,
+          img_url: item.img_url
+        }
+      })
+
+      return itemData
+    })
+    .then(results => response.status(200).json(results))
+    .catch(err => {
+      console.log(err)
+      response.status(404).json({
+        message: 'Error with retrieving item data'
+      })
+    })
+  }
+
+
 })
 
 app.get('/items/:item_id', (request, response) => {
@@ -47,11 +64,73 @@ app.get('/items/:item_id', (request, response) => {
   .where({item_id: item_id})
   .then(data => response.status(200).json(data))
   .catch(err => {
-    res.status(404).json({
+    response.status(404).json({
       message: 'item not found'
     })
   })
 });
+
+async function getMaxItemID(){
+  return knex('items').max('item_id').first();
+}
+
+app.post('/items', async (request, response) => {
+  const {user_id, quantity, item_name, description, img_url} = request.body;
+  const item_id = await getMaxItemID();
+  const new_item = {
+    item_id: ++item_id.max,
+    user_id: user_id,
+    item_name: item_name,
+    description: description,
+    quantity: quantity,
+    img_url: img_url
+  }
+
+  knex('items')
+  .insert(new_item)
+  .then(x => response.status(200).json(new_item))
+  .catch(err => response.status(500).send(err))
+})
+
+app.put('/items/:item_id', (request, response) => {
+  const {item_id, user_id, quantity, item_name, description, img_url} = request.body;
+  const edited_item = {
+    item_id: item_id,
+    user_id: user_id,
+    quantity: quantity,
+    item_name: item_name,
+    description: description,
+    img_url: img_url
+  }
+
+  knex('items')
+  .where({item_id: item_id})
+  .update(edited_item)
+  .then(x => response.status(200).json(new_item))
+  .catch(err => response.status(500).send(err))
+})
+
+app.delete('/items/:item_id', async (request, response) => {
+  const {item_id} = request.params;
+
+  console.log(item_id);
+
+  knex('items')
+  .where({item_id: item_id})
+  .del()
+  .then((deleted_item) => {
+    if (deleted_item) {
+      response.status(200).send(`Item ${item_id} has been deleted`)
+    } else {
+      response.status(404).send(`Item ${item_id} does not exist`)
+    }
+  })
+  .catch((err) => {
+    console.log(err)
+    response.status(500).send(item_id)
+  })
+})
+
 
 ///////////////////////////////////////Endpoints for users table/////////////////////////////////////////////////////////////
 
